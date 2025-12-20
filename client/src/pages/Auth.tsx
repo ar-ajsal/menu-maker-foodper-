@@ -9,10 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coffee, LayoutGrid } from "lucide-react";
-
-// Using a simplified schema for the MVP auth (since we don't have direct registration endpoints in the provided routes, 
-// we will assume standard auth flow - this is a UI implementation for the "blueprint" auth)
+import { Coffee, LayoutGrid, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const authSchema = z.object({
   username: z.string().email("Please enter a valid email"),
@@ -21,19 +19,65 @@ const authSchema = z.object({
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, isLoading: isCheckingAuth } = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  
+  const form = useForm<z.infer<typeof authSchema>>({
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
   
   if (user) {
     setLocation("/dashboard");
     return null;
   }
 
-  // Redirect to dashboard on login success handled by side effect of useAuth or server redirect usually,
-  // but for blueprint auth, we usually just link to the login endpoint or show a form that POSTs.
-  // Since we are using Replit Auth (blueprint), we just redirect window.location.
+  const onSubmit = async (data: z.infer<typeof authSchema>) => {
+    setIsSubmitting(true);
+    try {
+      const endpoint = isLogin ? "/api/login" : "/api/register";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
 
-  const handleLogin = () => {
-    window.location.href = "/login";
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      toast({
+        title: isLogin ? "Logged in" : "Account created",
+        description: isLogin ? "Welcome back!" : "Welcome to QR Menu!",
+      });
+
+      // Redirect will happen automatically via useAuth when user data updates
+      setTimeout(() => {
+        setLocation("/dashboard");
+      }, 500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -57,22 +101,80 @@ export default function AuthPage() {
         <Card className="w-full max-w-md shadow-xl border-border/50">
           <CardHeader className="text-center space-y-2">
             <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
-              <LayoutGrid className="w-6 h-6" />
+              <Coffee className="w-6 h-6" />
             </div>
-            <CardTitle className="text-2xl font-serif">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-serif">
+              {isLogin ? "Welcome Back" : "Create Account"}
+            </CardTitle>
             <CardDescription>
-              Sign in to access your cafe dashboard
+              {isLogin
+                ? "Sign in to access your cafe dashboard"
+                : "Create a new account to get started"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <Button className="w-full h-12 text-base" onClick={handleLogin}>
-               Login / Register
-             </Button>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="you@example.com"
+                          type="email"
+                          disabled={isSubmitting}
+                          {...field}
+                          data-testid="input-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="••••••••"
+                          type="password"
+                          disabled={isSubmitting}
+                          {...field}
+                          data-testid="input-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                  data-testid={isLogin ? "button-login" : "button-register"}
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {isLogin ? "Sign In" : "Create Account"}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 text-center text-sm text-muted-foreground">
-            <p>
-              By continuing, you agree to our Terms of Service and Privacy Policy.
-            </p>
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-primary hover:underline"
+              data-testid="button-toggle-auth"
+            >
+              {isLogin ? "Don't have an account? Register" : "Already have an account? Sign in"}
+            </button>
+            <p>By continuing, you agree to our Terms of Service and Privacy Policy.</p>
           </CardFooter>
         </Card>
       </div>
