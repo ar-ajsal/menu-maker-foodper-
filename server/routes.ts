@@ -20,9 +20,10 @@ export async function registerRoutes(
 
     try {
       const input = insertCafeSchema.omit({ ownerId: true, slug: true, qrCodeUrl: true }).parse(req.body);
+      const name = (input as any).name || "My Cafe";
       
       // Generate unique slug (simple version)
-      const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000);
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000);
       
       // Generate QR Code URL
       // In a real app, this would point to the deployed URL. For now, localhost/replit URL.
@@ -31,6 +32,7 @@ export async function registerRoutes(
 
       const cafe = await storage.createCafe({
         ...input,
+        name: (input as any).name || "My Cafe",
         ownerId: req.user.id,
         slug,
         qrCodeUrl: qrCodeDataUrl,
