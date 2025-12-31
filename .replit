@@ -37,3 +37,12 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+RAZORPAY_KEY_SECRET = "qBhzGHhNaZ14BmEbO2NwrPnT"
+CLOUDINARY_CLOUD_NAME = "dcympeemd"
+CLOUDINARY_API_SECRET = "y9ACwYdqNB_LQoKQ_LOwl-MpOXE"
+RAZORPAY_KEY_ID = "rzp_test_Ry8HZDKk5kYey7"
+CLOUDINARY_API_KEY = "166259698332515"

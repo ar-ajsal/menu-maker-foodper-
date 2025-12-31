@@ -65,6 +65,9 @@ export default function AuthPage() {
         description: isLogin ? "Welcome back!" : "Welcome to QR Menu!",
       });
 
+      // Refetch user data immediately
+      await queryClient.invalidateQueries({ queryKey: [api.auth.user.path] });
+
       // Redirect will happen automatically via useAuth when user data updates
       setTimeout(() => {
         setLocation("/dashboard");

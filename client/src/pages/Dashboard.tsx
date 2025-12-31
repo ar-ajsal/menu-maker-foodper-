@@ -35,8 +35,8 @@ export default function Dashboard() {
   }
 
   // Handle redirect if not logged in
-  if (!user) {
-    setLocation("/login");
+  if (!user && !isLoading) {
+    setLocation("/auth");
     return null;
   }
 
