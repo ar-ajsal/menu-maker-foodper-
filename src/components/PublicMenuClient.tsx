@@ -22,7 +22,7 @@ export default function PublicMenuClient({ cafe, categories, offers = [] }: Publ
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     // Refs for scroll spy
-    const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
+    const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
     const navRef = useRef<HTMLDivElement>(null);
 
     // Sort categories
@@ -225,12 +225,12 @@ export default function PublicMenuClient({ cafe, categories, offers = [] }: Publ
                                     id={`nav-${cat.id}`}
                                     onClick={() => scrollToCategory(cat.id.toString())}
                                     className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === cat.id.toString()
-                                            ? theme === 'premium'
-                                                ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/20'
-                                                : 'bg-indigo-600 text-white shadow-md'
-                                            : theme === 'premium'
-                                                ? 'text-zinc-400 hover:text-amber-100'
-                                                : 'text-gray-500 hover:bg-gray-100'
+                                        ? theme === 'premium'
+                                            ? 'bg-amber-600 text-white shadow-lg shadow-amber-900/20'
+                                            : 'bg-indigo-600 text-white shadow-md'
+                                        : theme === 'premium'
+                                            ? 'text-zinc-400 hover:text-amber-100'
+                                            : 'text-gray-500 hover:bg-gray-100'
                                         }`}
                                 >
                                     {cat.name}

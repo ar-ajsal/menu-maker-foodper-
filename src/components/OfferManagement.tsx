@@ -56,7 +56,7 @@ export function OfferManagement({ cafeId, subscriptionPlan }: OfferManagementPro
                 </div>
 
                 <OfferDialog
-                    cafeId={cafeId}
+                    cafeId={Number(cafeId)}
                     trigger={
                         <Button className="bg-orange-600 hover:bg-orange-700">
                             <Plus className="w-4 h-4 mr-2" />
@@ -75,7 +75,7 @@ export function OfferManagement({ cafeId, subscriptionPlan }: OfferManagementPro
                             {/* Actions overlay */}
                             <div className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 bg-white/80 backdrop-blur-sm rounded-md border z-10">
                                 <OfferDialog
-                                    cafeId={cafeId}
+                                    cafeId={Number(cafeId)}
                                     initialData={offer}
                                     trigger={
                                         <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-blue-600">

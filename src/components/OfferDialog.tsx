@@ -42,7 +42,6 @@ const formSchema = z.object({
     isActive: z.boolean().default(true),
     isVisible: z.boolean().default(true),
     isFeatured: z.boolean().default(false),
-    cafeId: z.number(),
 }).refine((data) => {
     if (data.offerType === 'category' && data.appliedCategories.length === 0) return false;
     if (data.offerType === 'item' && data.appliedItems.length === 0) return false;
@@ -92,7 +91,7 @@ export function OfferDialog({ cafeId, trigger, initialData, open: controlledOpen
     }, [open, cafeId]);
 
     // Construct default values without duplication
-    const defaultValues: Partial<FormValues> = {
+    const defaultValues: FormValues = {
         title: initialData?.title || "",
         description: initialData?.description || "",
         imageUrl: initialData?.imageUrl || "",
@@ -105,27 +104,27 @@ export function OfferDialog({ cafeId, trigger, initialData, open: controlledOpen
         endAt: initialData?.endAt ? new Date(initialData.endAt) : undefined,
         isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
         isVisible: initialData?.isVisible !== undefined ? initialData.isVisible : true,
-        isFeatured: initialData?.isFeatured !== undefined ? initialData.isFeatured : false,
-        cafeId: cafeId,
+        isFeatured: initialData?.isFeatured !== undefined ? initialData.isFeatured : false
     };
 
-    const form = useForm<FormValues>({
+    const form = useForm({
         resolver: zodResolver(formSchema),
-        defaultValues: defaultValues as FormValues,
+        defaultValues,
     });
 
     const offerType = form.watch("offerType");
 
     useEffect(() => {
         if (open) {
-            form.reset(defaultValues as FormValues);
+            form.reset(defaultValues);
         }
-    }, [open, initialData, cafeId]); // Removed form from deps to avoid loop if form object changes
+    }, [open, initialData]);
 
     const mutation = useMutation({
         mutationFn: async (values: FormValues) => {
             const payload = {
                 ...values,
+                cafeId, // Explicitly inject cafeId from props
                 appliedCategories: values.appliedCategories.map(Number),
                 appliedItems: values.appliedItems.map(Number),
             };
@@ -209,12 +208,12 @@ export function OfferDialog({ cafeId, trigger, initialData, open: controlledOpen
 
                             {offerType === 'category' && (
                                 <FormField control={form.control} name="appliedCategories" render={({ field }) => (
-                                    <FormItem><FormLabel>Categories</FormLabel><FormControl><MultiSelect selected={field.value} options={categories} onChange={field.onChange} placeholder="Select categories" /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Categories</FormLabel><FormControl><MultiSelect selected={field.value || []} options={categories} onChange={field.onChange} placeholder="Select categories" /></FormControl><FormMessage /></FormItem>
                                 )} />
                             )}
                             {offerType === 'item' && (
                                 <FormField control={form.control} name="appliedItems" render={({ field }) => (
-                                    <FormItem><FormLabel>Items</FormLabel><FormControl><MultiSelect selected={field.value} options={items} onChange={field.onChange} placeholder="Select items" /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Items</FormLabel><FormControl><MultiSelect selected={field.value || []} options={items} onChange={field.onChange} placeholder="Select items" /></FormControl><FormMessage /></FormItem>
                                 )} />
                             )}
 
@@ -223,7 +222,7 @@ export function OfferDialog({ cafeId, trigger, initialData, open: controlledOpen
                                     <FormItem><FormLabel>Discount Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="percent">Percentage %</SelectItem><SelectItem value="flat">Flat Amount ₹</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="discountValue" render={({ field }) => (
-                                    <FormItem><FormLabel>Value</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Value</FormLabel><FormControl><Input type="number" {...field} value={field.value as number} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                         </div>

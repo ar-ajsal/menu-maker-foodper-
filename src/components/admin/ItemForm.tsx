@@ -61,24 +61,7 @@ export const ItemForm = ({ open, onClose, initialData, categories, defaultCatego
 
     // ... (keep middle lines about useEffect)
 
-    {/* VARIANTS TAB */ }
-    <TabsContent value="variants" className="pt-4">
-        <FormField control={form.control} name="variants" render={({ field }) => (
-            <VariantEditor variants={field.value || []} onChange={field.onChange} />
-        )} />
-    </TabsContent>
 
-    {/* TAGS TAB */ }
-    <TabsContent value="tags" className="pt-4">
-        <FormField control={form.control} name="tags" render={({ field }) => (
-            <FormItem>
-                <FormLabel>Tags (Dietary, Allergen, etc.)</FormLabel>
-                <FormControl>
-                    <TagManager selectedTags={field.value || []} onChange={field.onChange} />
-                </FormControl>
-            </FormItem>
-        )} />
-    </TabsContent>
 
     // Reset form when initialData changes
     useEffect(() => {
@@ -231,7 +214,7 @@ export const ItemForm = ({ open, onClose, initialData, categories, defaultCatego
                                         <FormField control={form.control} name="categoryId" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Category</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <Select onValueChange={field.onChange} value={String(field.value)}>
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Select category" />
